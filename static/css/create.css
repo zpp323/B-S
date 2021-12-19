@@ -1,0 +1,22 @@
+.imgzone-empty{
+    width: 100vw;
+    height: 100px;
+}
+
+.textzone{
+    width: 100vw;
+    height: 260px;
+    background-color: beige;
+}
+
+.content{
+	z-index: 1;
+	display: block;
+	height: 860px;
+}
+
+.ret{
+    font-size: 20px;
+    margin-right: 2%;
+}
+

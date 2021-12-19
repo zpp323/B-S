@@ -1,0 +1,62 @@
+nav{
+	display: flex;
+	height: 60px;
+	background-color: bisque;
+	text-align: center;
+	position: fixed;
+	width: 100%;
+	line-height: 60px;
+	z-index: 100;
+}
+
+.nav-l{
+	font-size: 20px;
+	color: black;
+	float: left;
+}
+
+.nav-r{
+	font-size: 20px;
+	color: black;
+	float: right;
+}
+
+.last{
+	margin-left: 8%;
+}
+
+.next{
+	margin-left: 2%;
+}
+
+.export{
+	margin-left: 1.8%;
+}
+
+.set{
+	margin-left: 2%;
+}
+
+.exit{
+	margin-right: 6%;
+}
+
+.uname{
+	margin-right: 3%;
+}
+
+.uphoto{
+	margin-right: 3%;
+}
+
+
+
+.footer{
+	width: 100%;
+	background-color: black;
+	height: 90px;
+	text-align: center;
+	line-height: 90px;
+	position: fixed;
+	top: 630px;
+}

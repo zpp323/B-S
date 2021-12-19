@@ -1,0 +1,36 @@
+
+.block1{
+    display: block;
+}
+
+.empty{
+    width: 100vw;
+    height: 60px;
+}
+
+.img1{
+    background-color: aliceblue;
+}
+
+.img2{
+    width: 30vh;
+    height: 30vh;
+}
+
+.empty3{
+    height: 20vh;
+}
+
+.content{
+	z-index: 1;
+	display: flex;
+	height: 860px;
+}
+
+.icon {
+    width: 2em;
+    height: 2em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
