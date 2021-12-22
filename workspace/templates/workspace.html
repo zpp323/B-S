@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../../static/css/style.css" type="text/css" rel="stylesheet">
+    <title>{{ web_title }}</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <style>
+        .footer{
+            width: 100%;
+            background-color: black;
+            height: 90px;
+            text-align: center;
+            line-height: 90px;
+            position: fixed;
+            top: 630px;
+        }
+
+        .right-panel{
+            position: absolute;
+            top: 60px;
+            right: 0;
+            border:5px solid #123;
+            width: 200px;
+            height: 680px;
+        }
+        .alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 200px;
+            margin-left: -100px;
+            z-index: 99999;
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+
+        .alert-warning {
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+        }
+
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        .box {
+            border:5px dashed;
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            opacity: 1;
+            border-color: black;
+            cursor: move;
+        }
+        .mytag{
+            font-size: 20px;
+            width: 150px;
+            height: 30px;
+            background-color: wheat;
+            border: 2px solid brown;
+            color: blue;
+        }
+    </style>
+</head>
+<body style="display: block;">
+<nav>
+    <a class="nav-l last" href="#" onclick="lastimg()">上一张</a>
+    <a class="nav-l next" href="#" onclick="nextimg()">下一张</a>
+    <a class="nav-l export" href="#" onclick="saveData()">保存</a>
+    <a class="nav-l set" href="../">返回</a>
+    <a class="nav-r exit" href="logout/">退出登录</a>
+    <p class="nav-r uname">{{ uname }}</p>
+</nav>
+<div class="content">
+    <div style="width:98.5vw;height: 59px;"></div>
+    <div class="alert" style="height:50px;line-height:50px;font-size:20px;width:30px;margin:auto;position:absolute;top:-15vh;left:0;bottom:0;right:0;display: flex;align-items: center;"></div>
+    <div>
+        <div style="width: 200px;height: 680px;background-color: #CCCCCC;position: absolute;left: 0;top: 60px;display: block;">
+            <img src="/static/xuxian.png" id="button_one" alt="xuxuan" style="height: 80px;width: 80px;margin-left: 60px;margin-top: 200px;"/><br/>
+            <button style="font-size: 20px;margin-left: 72px;background-color: darkgrey;border-radius: 10%;" onclick="changestatus()">线框</button>
+        </div>
+        <button style="position: absolute;left: 35vw;height: 50px;width: 130px;font-size: 20px;top: 72vh;background-color: beige;border-radius: 5%;">序列号：{{ sequence_number }}</button>
+        <div style="text-align: center;">
+            {% if img_route != 'empty' %}
+                <div style="width:36vw;height: 12vh;"></div>
+                <img src="{{ img_route }}" alt="#" style="width: 36vw;height: 42vh;" id="main_img">
+            {% else %}
+                <p style="font-size: 20px;">空项目</p>
+            {% endif %}
+        </div>
+    <div class="right-panel" id="tag_list"></div>
+    </div>
+</div>
+<div class="footer">
+    <p style="color: white; font-size: 20px;">Copyright@ZYNM2021 All right reserve.</p>
+</div>
+
+<script type="text/javascript">
+    var status1 = 1;
+
+    var stack = new Array(30);//最多 30 个标签
+    var stacktop = -1;//栈顶
+
+    function changestatus(){
+        if(status1===1){
+            $('#button_one').attr('src', '/static/xuxiankuang2.png');
+            status1 = 0;
+        }
+        else{
+            $('#button_one').attr('src', '/static/xuxian.png');
+            status1 = 1;
+        }
+    }
+
+    function lastimg(){
+        if( {{ sequence_number }} == 1 ) {
+            $('.alert').html('没有了~').addClass('alert-success').show().delay(1500).fadeOut()
+        }
+        else {
+            window.location.href = "./?id=" + {{ id }} +'&require_seq=' + ({{ sequence_number }}-1);
+        }
+    }
+
+    function nextimg(){
+        if ({{ sequence_number }} == {{ total_img_number }} ) {
+            $('.alert').html('没有了~').addClass('alert-success').show().delay(1500).fadeOut();
+        }
+        else {
+            window.location.href = "./?id=" + {{ id }} +'&require_seq=' + ({{ sequence_number }}+1);
+        }
+    }
+
+    window.onload =  function (e) {
+        e = e || window.event;
+        // startX, startY 为鼠标点击时初始坐标
+        // diffX, diffY 为鼠标初始坐标与 box 左上角坐标之差，用于拖动
+        var  startX, startY, diffX, diffY;
+        // 是否拖动，初始为 false
+        // var  dragging =  false;
+        // 鼠标按下
+        document.onmousedown =  function (e) {
+            if (status1 === 0){
+                if (e.button === 0){
+                    if (e.pageX>=200 && e.pageX<=1100 && e.pageY>=80 && e.pageY<=560){
+                        // 如果鼠标在 box 上被按下
+                        if (e.target.className.match(/box$/)) {
+                            startX = e.pageX;
+                            startY = e.pageY;
+                            // 允许拖动
+                             dragging =  true;
+                            // 设置当前 box 的 id 为 moving_box
+                            if (document.getElementById( "moving_box" ) !==  null ) {
+                                document.getElementById( "moving_box" ).removeAttribute( "id" );
+                            }
+                            e.target.id =  "moving_box" ;
+                            // 计算坐标差值
+                            diffX = startX - e.target.offsetLeft;
+                            diffY = startY - e.target.offsetTop;
+                        }
+                        else {
+                            startX = e.pageX;
+                            startY = e.pageY;
+                            // 在页面创建 box
+                            var  active_box = document.createElement( "div" );
+                            active_box.id =  "active_box" ;
+                            active_box.style.top = startY +  'px' ;
+                            active_box.style.left = startX +  'px' ;
+                            active_box.style.position = 'absolute';
+                            var myrandom = Math.round(Math.random()*900+99);
+                            active_box.className =  myrandom.toString()+" box" ;
+                            active_box.style.borderColor='#f14d4b';
+                            var new_tag = $('<div style="width: 190px;display: flex">'+
+                                '<input type="text" value="请输入标签" class="mytag"/>'+
+                                '<button style="font-size: 12px;" onclick="deleteEle(this)" id="'+
+                                myrandom.toString()+//给 button 设置 id ，一个随机的三位整数，这个随机数和对应的 box 的 class 名一样
+                                '">删除</button></div>');
+                            new_tag.id = myrandom.toString();
+                            $('#tag_list').append(new_tag);
+                            document.body.appendChild(active_box);
+                            active_box =  null;
+                            new_tag = null;
+                        }
+                    }
+                }
+                else {//右键
+                    status1 = 1;
+                    $('#button_one').attr('src', '/static/xuxian.png');
+                }
+            }
+        }
+        // 鼠标移动
+        document.onmousemove =  function (e) {
+            if (status1 === 0) {
+                // 更新 box 尺寸
+                if (document.getElementById( "active_box" ) !==  null ) {
+                     var  ab = document.getElementById( "active_box" );
+                     ab.style.width = e.pageX - startX +  'px' ;
+                     ab.style.height = e.pageY - startY +  'px' ;
+                }
+                // 移动，更新 box 坐标
+                if (document.getElementById( "moving_box" ) !==  null  && dragging) {
+                     var  mb = document.getElementById( "moving_box" );
+                     mb.style.top = e.pageY - diffY +  'px' ;
+                     mb.style.left = e.pageX - diffX +  'px' ;
+                }
+            }
+        };
+        // 鼠标抬起
+        document.onmouseup =  function (e) {
+            if (status1 === 0) {
+                // 禁止拖动
+                dragging =  false ;
+                if (document.getElementById( "active_box" ) !==  null ) {
+                     var  ab = document.getElementById( "active_box" );
+                     ab.removeAttribute( "id" );
+                     // 如果长0宽均小于 3px，移除 box
+                     if (ab.offsetWidth < 5 || ab.offsetHeight < 5) {
+                         document.body.removeChild(ab);
+                     }
+                }
+                status1 = 1;
+                $('#button_one').attr('src', '/static/xuxian.png');
+                stacktop += 1;
+                stack[stacktop] = stacktop;
+                //在右侧框中添加标签
+                //var new_tag = $('<div style="width: 190px;display: flex"><input class="mytag" type="text" value="请输入标签"></input><button style="font-size: 12px;" onclick="deleteEle(this)">删除</button></div>')
+                //$('#tag_list').append(new_tag)
+            }
+        };
+    };
+
+    function deleteEle(e) {
+        var classname = $(e).attr('id');
+        $(e).parent().remove()
+        var kuang = document.body.getElementsByClassName(classname);
+        if (kuang!=null){
+            $(kuang[0]).remove()
+        }
+    }
+
+    function saveData() {
+        var image = document.getElementById('main_img');
+        if (image != null){
+            var  img_top = $(image).offset().top
+            var img_left = $(image).offset().left
+            var img_width = $(image).width();
+            var img_height = $(image).height();
+            var boxes = document.body.getElementsByClassName('box');
+
+            var send_data_img_width = img_width
+            var send_data_img_height = img_height
+            var send_data_box_width = []
+            var send_data_box_height = []
+            var send_data_vertex_top = []
+            var send_data_vertex_left = []
+            var send_data_tag_text = []
+
+            for (var i=0;i<boxes.length;i++){
+                var box_top = $(boxes[i]).offset().top;
+                var box_left = $(boxes[i]).offset().left;
+                var box_width = $(boxes[i]).width();
+                var box_height = $(boxes[i]).height();
+                if (box_top<img_top){
+                    if (box_height<img_top-box_top){
+                        return;
+                    }
+                    box_height -= (img_top-box_top);
+                    box_top = img_top;
+                }
+                if (box_left<img_left){
+                    if (box_width<img_left-box_left){
+                        return;
+                    }
+                    box_width -= (img_left-box_left);
+                    box_left = img_left;
+                }
+                if (box_left+box_width>img_left+img_width){
+                    if (box_left>=img_left+img_width){
+                        return;
+                    }
+                    box_width = img_left+img_width-box_left;
+                }
+                if (box_top+box_height>img_top+img_height){
+                    if (box_top>=img_top+img_height){
+                        return;
+                    }
+                    box_height = img_top+img_height-box_top;
+                }
+
+                send_data_box_width.push(box_width)
+                send_data_box_height.push(box_height)
+                send_data_vertex_left.push(box_left-img_left)
+                send_data_vertex_top.push(box_top-img_top)
+            }
+            var tags = document.getElementById('tag_list')
+            var tag_lists = tags.getElementsByTagName('input')
+            for (var j=0;j<tag_lists.length;j++){
+                send_data_tag_text.push(tag_lists[j].value)
+            }
+            $.ajax({
+                     type: "post",
+                    headers: {"X-CSRFToken": $.cookie('csrftoken')},
+                    data:JSON.stringify({'id': {{ id }}, 'sequence_number': {{ sequence_number }}, 'img_width': send_data_img_width, 'img_height': send_data_img_height,
+                        'box_width': send_data_box_width, 'box_height': send_data_box_height, 'vertex_left': send_data_vertex_left, 'vertex_top': send_data_vertex_top,
+                        'tag_text': send_data_tag_text}),
+                    contentType: "application/json",
+                }).done(function (res) {
+                    $('.alert').html('保存成功').addClass('alert-success').show().delay(1500).fadeOut()
+                });
+        }else {
+            console.log('image is', null)
+        }
+    }
+
+</script>
+<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+<script src="../../../static/js/jquery.cookie.js"></script>
+</body>
+</html>
