@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'login.css' %}"/>
+</head>
+<body>
+
+<div class="box" >
+    <div class="container" style="width: 400px">
+		<div class="dl" style="background-color:#f2fa57"><h2 style="margin-bottom: 0;">✉登  录✉</h2></div>
+		<div class="content" style="background-color:#89f0ce;height:205px;width:400px;float:left;">
+        <form method="post">
+            {% csrf_token %}
+			<div class="xx" align="center">
+				<p> </p>
+				账  户：<input name="name" type="text" placeholder="请输入用户名"/><br>
+				密  码：<input name="password" type="password" placeholder="请输入密码"/>
+				<p> </p>
+			</div>
+			<div id="error_box"><br></div>
+			<p>  </p>
+            {% if register_success == 'ok' %}
+            <p style="color: red">注册成功！</p>
+            {% elif login_fail == 'y' %}
+                <p style="color: red">登录失败，请检查用户名和密码是否正确!</p>
+            {% endif %}
+			<div class="an" >
+				<input type="submit" value="登录"></button>
+				<button type="button">取消</button>
+                <button type="button" onclick="myRegister()">注册</button>
+			</div>
+        </form>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function myLogin() {
+	        var oUname = document.getElementById("name");
+	        var oError = document.getElementById("error_box");
+	        var opassword = document.getElementById("password");
+	        oError.innerHTML="<br>"
+	        //name
+	        if(oUname.value.length<6||oUname.value.length>20){
+	                oError.innerText="☞用户名请输入6-20个字符";
+	                return;
+	            }
+	            else if ((oUname.value.charCodeAt(0)>=48)&&oUname.value.charCodeAt(0)<=57){
+	            oError.innerText="✘用户名首字母不能为数字";
+	                return;
+	        }
+	        else for(var i=0; i<oUname.value.length; i++){
+	                if((oUname.value.charCodeAt(i)<48)||(oUname.value.charCodeAt(i)>57) && (oUname.value.charCodeAt(0)<97) || (oUname.value.charCodeAt(0)>122)){
+	                    oError.innerHTML="✘用户名只能是小写字母与数字";
+	                    return;
+	                }
+	        }
+	        //password
+	        if(opassword.value.length<6||opassword.value.length>20){
+	                oError.innerText="☛密码请输入6-20个字符内";
+	                return;
+	        }
+	            window.alert("✌登录成功！\\(^o^)/YES!");
+	        }
+
+            function myRegister() {
+                window.location.href = '../reg/';
+            }
+</script>
+</body>
+</html>
